@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}
+debates
+{% endblock %}
+
+{% block content %}
+    <div class="mt-5" style="margin-left: 10%; margin-right: 10%">
+        <div style="width: 100%; height: 100%; display: grid; place-items: center">
+            <div >
+                <iframe
+                        width="560"
+                        height="315"
+                        src="https://www.youtube.com/embed/cZSCDMaS7Rw"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+
+                </iframe>
+            </div>
+        </div>
+
+        <div class="row text-center">
+            <div class="col-6">
+                <h1>Trump</h1>
+                <h5><i>38%</i></h5>
+                431k votes
+                <br>
+                <button class="btn btn-success">vote</button>
+            </div>
+            <div class="col-6">
+                <h1>Biden</h1>
+                <h5><i>62%</i></h5>
+                899k votes
+                <br>
+                <button class="btn btn-success">vote</button>
+            </div>
+        </div>
+
+        <h2 style="text-align: center"><b>Comments</b></h2>
+
+    </div>
+{% endblock %}
