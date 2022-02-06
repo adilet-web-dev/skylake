@@ -48,7 +48,10 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'channels',
-    'django_extensions'
+    'django_extensions',
+
+    'debates.apps.DebatesConfig',
+    'users.apps.UsersConfig'
 
 ]
 
@@ -120,6 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "users.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

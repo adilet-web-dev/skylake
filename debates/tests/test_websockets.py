@@ -22,4 +22,3 @@ class TestDebateConsumer(TestCase):
 
 		response = await communicator.receive_json_from()
 		self.assertEqual(response, "hello")
-
