@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}
 debates
 {% endblock %}
 
 {% block content %}
-    <div class="mt-5" style="margin-left: 10%; margin-right: 10%">
+    <div class="mt-5" style="margin-left: 10%; margin-right: 10%" id="app">
         <div style="width: 100%; height: 100%; display: grid; place-items: center">
             <div >
                 <iframe
                         width="560"
                         height="315"
                         src="https://www.youtube.com/embed/cZSCDMaS7Rw"
-                        title="YouTube video player" frameborder="0"
+                        title="YouTube video player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen>
 
@@ -22,28 +24,58 @@ debates
 
         <div class="row text-center">
             <div class="col-6">
-                <h1>Trump</h1>
-                <h5><i>38%</i></h5>
-                431k votes
+                <h1>[[ candidate1.name ]]</h1>
+                <h5><i>[[ getPercentageForCandidate(candidate1) ]]%</i></h5>
+                [[ candidate1.votes ]] votes
                 <br>
-                <button class="btn btn-success">vote</button>
+                <button class="btn btn-success" v-on:click="candidate1.votes++">vote</button>
             </div>
             <div class="col-6">
-                <h1>Biden</h1>
-                <h5><i>62%</i></h5>
-                899k votes
+                <h1>[[ candidate2.name ]]</h1>
+                <h5><i>[[ getPercentageForCandidate(candidate2) ]]%</i></h5>
+                [[ candidate2.votes ]] votes votes
                 <br>
-                <button class="btn btn-success">vote</button>
+                <button class="btn btn-success" v-on:click="candidate2.votes++">vote</button>
             </div>
         </div>
 
         <h2 style="text-align: center"><b>Comments</b></h2>
 
         <div style="width: 100%; height: 100%; display: grid; place-items: center">
-            <textarea id="chat-log" cols="100" rows="10"></textarea><br>
-            <input id="chat-message-input" type="text" size="100"><br>
+            <textarea cols="100" rows="10"></textarea><br>
+            <input type="text" size="100"><br>
             <input id="chat-message-submit" type="button" value="Send" class="btn btn-dark">
         </div>
 
     </div>
+{% endblock %}
+
+{% block inline_js %}
+    <script src="{% static 'vue.js' %}"></script>
+{% endblock %}
+
+{% block js %}
+    <script>
+        let app = new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#app",
+            data: {
+                candidate1: {
+                    name: "Trump",
+                    votes: 1
+                },
+                candidate2: {
+                    name: "Biden",
+                    votes: 1
+                }
+            },
+            methods: {
+                getPercentageForCandidate: function (candidate) {
+                    let total = this.candidate1.votes + this.candidate2.votes;
+                    return Math.round(100 / total * candidate.votes);
+                }
+            }
+
+        })
+    </script>
 {% endblock %}

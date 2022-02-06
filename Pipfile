@@ -5,11 +5,14 @@ name = "pypi"
 
 [packages]
 django = "*"
-django-channels = "*"
 djangorestframework = "*"
 dj-database-url = "*"
 factory-boy = "*"
 psycopg2-binary = "*"
+django-extensions = "*"
+ipython = "*"
+channels = "*"
+channels-redis = "*"
 
 [dev-packages]
 
