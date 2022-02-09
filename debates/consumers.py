@@ -1,32 +1,30 @@
 import json
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.db import database_sync_to_async
+
+from debates.models import Debate
 
 
 class DebateConsumer(AsyncJsonWebsocketConsumer):
-	def __init__(self):
-		self.biden = 0
-		self.trump = 0
-		super(DebateConsumer, self).__init__()
-
 	async def connect(self):
-		self.room_name = 'debate1'
+		debate_public_id = self.scope["url_route"]["kwargs"]["uuid"]
 
-		await self.channel_layer.group_add(
-			self.room_name,
-			self.channel_name
-		)
+		if not await self.check_if_debate_exists(debate_public_id):
+			await self.close(code=404)
 
+		await self.channel_layer.group_add("debate", self.channel_name)
 		await self.accept()
 
-	async def receive_json(self, content, **kwargs):
-		await self.channel_layer.group_send(
-			self.room_name,
-			{
-				"type": "send_message",
-				"message": content
-			}
-		)
+	async def disconnect(self, code):
+		await self.channel_layer.group_discard("debate", self.channel_name)
 
-	async def send_message(self, event):
-		await self.send_json(event["message"])
+	async def receive_json(self, content, **kwargs):
+		pass
+
+	@database_sync_to_async
+	def check_if_debate_exists(self, public_id):
+		return Debate.objects.filter(public_id=public_id).exists()
+
+
+

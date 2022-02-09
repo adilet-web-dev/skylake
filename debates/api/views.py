@@ -18,8 +18,9 @@ class DebateViewSet(ModelViewSet):
 		candidates = json.loads(request.data["candidates"])
 		if len(candidates) < 2 or len(candidates) > 4:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
-		debate = self.get_object()
-		for candidate in candidates:
-			Candidate.objects.create(name=candidate, debate=debate)
 
+		debate = self.get_object()
+
+		for candidate in candidates:
+			Candidate.objects.create(debate=debate, name=candidate)
 		return Response(status=status.HTTP_201_CREATED)

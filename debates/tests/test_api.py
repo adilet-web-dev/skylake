@@ -27,14 +27,14 @@ class CreateDebateAPITest(TestCase):
 		response = self.client.post("/api/v1/debates/", payload)
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-		self.assertTrue(Debate.objects.filter(topic=payload["topic"]).exists())
+		self.assertTrue(Debate.objects.filter(topic="president").exists())
 
-		response = self.client.post(self.candidate_url.format(response.data["id"]), {
-			"candidates": json.dumps(["Biden", "Trump"])
-		})
+		payload = {"candidates": json.dumps(['Biden', 'Trump'])}
+
+		response = self.client.post(self.candidate_url.format(response.data["id"]), payload)
 
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-		self.assertEqual(Debate.objects.get(topic=payload["topic"]).candidates.count(), 2)
+		self.assertEqual(Debate.objects.get(topic="president").candidates.count(), 2)
 
 	def test_candidate_number_validation(self):
 		debate = DebateFactory()

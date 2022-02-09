@@ -1,9 +1,93 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div>
-        <form method="post">
+    <div id="app">
+        <div class="box">
+            <input type="text" class="form-control" placeholder="topic" v-model:value="topic"><br>
+            <input type="text" class="form-control" placeholder="add candidates" v-model:value="currentCandidate">
+            <button v-on:click="candidates.push(currentCandidate); currentCandidate='';" class="btn btn-success mt-3">
+                add candidate
+            </button>
+            <ul>
+                <li v-for="candidate in candidates">[[ candidate ]]</li>
+            </ul>
+            <input type="url" v-model:value="stream"  placeholder="url" class="form-control">
 
-        </form>
+            <button class="btn btn-primary" v-on:click="createDebate">
+                create
+            </button>
+        </div>
+
+
+
     </div>
+
+    {% csrf_token %}
+{% endblock %}
+
+{% block inline_js %}
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock %}
+
+{% block js %}
+    <script>
+        axios.defaults.xsrfCookieName = 'csrftoken';
+        axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+
+        let app = new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#app",
+            data: {
+                topic: "",
+                currentCandidate: "",
+                candidates: [],
+                stream: ""
+            },
+            methods: {
+                createDebate: async function() {
+
+                    let self = this;
+
+                    const url = "{% url 'api:debate-list' %}";
+                    console.table(this.$data);
+                    axios.post(url, this.$data).then(function (response) {
+                        if (response.status === 201){
+                            self.sendCandidates(response.data.id);
+                        }
+                    }).catch(function (error) {
+                        console.log(error.response.data);
+                    })
+
+                },
+                sendCandidates: async function(debateId) {
+                    let self = this;
+                    const url = `/api/v1/debates/${debateId}/add_candidates/`;
+                    axios.post(url, {candidates: self.candidates})
+                    .then(function(){
+                        window.location.replace("");
+                    });
+                }
+            }
+        })
+    </script>
+{% endblock %}
+
+{% block style %}
+    <style>
+        #app {
+            width: 100%;
+            height: 80vh;
+            display: grid;
+            place-items: center;
+            padding: 3%;
+        }
+        .box {
+            padding-left: 10%;
+            padding-right: 10%;
+        }
+        input {
+            margin-top: 15px;
+        }
+    </style>
 {% endblock %}
