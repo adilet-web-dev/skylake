@@ -23,19 +23,12 @@ debates
         </div>
 
         <div class="row text-center">
-            <div class="col-6">
-                <h1>[[ candidate1.name ]]</h1>
-                <h5><i>[[ getPercentageForCandidate(candidate1) ]]%</i></h5>
-                [[ candidate1.votes ]] votes
+            <div v-for="candidate in candidates" v-bind:class="'col-' + 12 / candidates.length">
+                <h1>[[ candidate.name ]]</h1>
+                <h5><i>[[ Math.round(100 / totalVotes * candidate.votes) ]]%</i></h5>
+                [[ candidate.votes ]] votes
                 <br>
-                <button class="btn btn-success" v-on:click="candidate1.votes++">vote</button>
-            </div>
-            <div class="col-6">
-                <h1>[[ candidate2.name ]]</h1>
-                <h5><i>[[ getPercentageForCandidate(candidate2) ]]%</i></h5>
-                [[ candidate2.votes ]] votes votes
-                <br>
-                <button class="btn btn-success" v-on:click="candidate2.votes++">vote</button>
+                <button class="btn btn-success" v-on:click="candidate.votes++">vote</button>
             </div>
         </div>
 
@@ -52,29 +45,48 @@ debates
 
 {% block inline_js %}
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 {% endblock %}
 
 {% block js %}
     <script>
+        axios.defaults.xsrfCookieName = 'csrftoken';
+        axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+
+        const ID = "{{id}}";
+
         let app = new Vue({
             delimiters: ["[[", "]]"],
             el: "#app",
             data: {
-                candidate1: {
-                    name: "Trump",
-                    votes: 1
-                },
-                candidate2: {
-                    name: "Biden",
-                    votes: 1
-                }
+                candidates: []
             },
-            methods: {
-                getPercentageForCandidate: function (candidate) {
-                    let total = this.candidate1.votes + this.candidate2.votes;
-                    return Math.round(100 / total * candidate.votes);
-                }
-            }
+            computed: {
+              totalVotes: function () {
+                  let total = 0;
+                  this.candidates.forEach(function (candidate) {
+                      total += candidate.votes;
+                  });
+                  return total;
+              }
+            },
+            beforeMount: function () {
+
+                let self = this;
+
+                let url = `/api/v1/debates/${ID}/`;
+                axios
+                    .get(url)
+                    .then(function (response) {
+                        self.$data = response.data;
+                    });
+
+                axios
+                    .get(url + 'get_candidates/')
+                    .then(function (response) {
+                        self.candidates = response.data;
+                    })
+            },
 
         })
     </script>

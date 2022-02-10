@@ -1,5 +1,3 @@
-import uuid
-
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -13,7 +11,6 @@ class Debate(models.Model):
 	ended_at = models.DateTimeField(null=True, blank=True)
 	stream = models.URLField(help_text="youtube live stream link")
 	views = models.PositiveIntegerField(default=0)
-	public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
 
 class Candidate(models.Model):

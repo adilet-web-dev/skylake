@@ -18,8 +18,6 @@
             </button>
         </div>
 
-
-
     </div>
 
     {% csrf_token %}
@@ -35,6 +33,8 @@
         axios.defaults.xsrfCookieName = 'csrftoken';
         axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 
+        const DOMAIN = "http://localhost:8000"
+
         let app = new Vue({
             delimiters: ["[[", "]]"],
             el: "#app",
@@ -42,21 +42,22 @@
                 topic: "",
                 currentCandidate: "",
                 candidates: [],
-                stream: ""
+                stream: "",
+                id: ""
             },
             methods: {
                 createDebate: async function() {
 
                     let self = this;
-
                     const url = "{% url 'api:debate-list' %}";
-                    console.table(this.$data);
+
                     axios.post(url, this.$data).then(function (response) {
                         if (response.status === 201){
+                            self.id = response.data.id;
                             self.sendCandidates(response.data.id);
                         }
                     }).catch(function (error) {
-                        console.log(error.response.data);
+                        console.error(error.response.data);
                     })
 
                 },
@@ -65,8 +66,12 @@
                     const url = `/api/v1/debates/${debateId}/add_candidates/`;
                     axios.post(url, {candidates: self.candidates})
                     .then(function(){
-                        window.location.replace("");
+                        self.redirectToDebate(self.id);
                     });
+                },
+                redirectToDebate: function (id) {
+                    const url = `${DOMAIN}/debates/${id}`;
+                    window.location.replace(url);
                 }
             }
         })

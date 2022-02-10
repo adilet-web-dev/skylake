@@ -7,7 +7,14 @@ class DebateSerializer(ModelSerializer):
 
 	class Meta:
 		model = Debate
-		fields = ["topic", "created_at", "ended_at", "stream", "views", "id"]
+		fields = [
+			"topic",
+			"created_at",
+			"ended_at",
+			"stream",
+			"views",
+			"id"
+		]
 
 
 class CandidateSerializer(ModelSerializer):
