@@ -13,6 +13,7 @@ django-extensions = "*"
 ipython = "*"
 channels = "*"
 channels-redis = "*"
+django-voting = "*"
 
 [dev-packages]
 

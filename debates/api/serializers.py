@@ -18,16 +18,7 @@ class DebateSerializer(ModelSerializer):
 
 
 class CandidateSerializer(ModelSerializer):
-	debate = DebateSerializer()
-
 	class Meta:
 		model = Candidate
-		fields = ["name", "votes", "debate"]
+		fields = ["name", "votes"]
 
-
-class CommentSerializer(ModelSerializer):
-	debate = DebateSerializer()
-
-	class Meta:
-		model = Candidate
-		fields = ["comment", "author", "debate"]

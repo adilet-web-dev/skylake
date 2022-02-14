@@ -8,6 +8,7 @@ debates
 
 {% block content %}
     <div class="mt-5" style="margin-left: 10%; margin-right: 10%" id="app">
+        <p>[[ online_users_number ]] watching</p>
         <div style="width: 100%; height: 100%; display: grid; place-items: center">
             <div >
                 <iframe
@@ -28,7 +29,10 @@ debates
                 <h5><i>[[ Math.round(100 / totalVotes * candidate.votes) ]]%</i></h5>
                 [[ candidate.votes ]] votes
                 <br>
-                <button class="btn btn-success" v-on:click="candidate.votes++">vote</button>
+                <button class="btn btn-success"
+                        v-on:click="candidate.votes++; sendVote(candidate)">
+                    vote
+                </button>
             </div>
         </div>
 
@@ -46,6 +50,7 @@ debates
 {% block inline_js %}
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="{% static 'services.js' %}"></script>
 {% endblock %}
 
 {% block js %}
@@ -54,12 +59,16 @@ debates
         axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 
         const ID = "{{id}}";
+        const WEBSOCKET_URL = `ws://localhost:8000/ws/debates/${ID}/`;
+
+        let ws = new WebsocketService(WEBSOCKET_URL);
 
         let app = new Vue({
             delimiters: ["[[", "]]"],
             el: "#app",
             data: {
-                candidates: []
+                candidates: [],
+                online_users_number: 0,
             },
             computed: {
               totalVotes: function () {
@@ -71,22 +80,45 @@ debates
               }
             },
             beforeMount: function () {
+                this.getDebateAndCandidates();
+                this.setWebsocketEvents();
 
-                let self = this;
-
-                let url = `/api/v1/debates/${ID}/`;
-                axios
-                    .get(url)
-                    .then(function (response) {
-                        self.$data = response.data;
-                    });
-
-                axios
-                    .get(url + 'get_candidates/')
-                    .then(function (response) {
-                        self.candidates = response.data;
-                    })
             },
+            methods: {
+                getDebateAndCandidates: function () {
+                    let self = this;
+
+                    let url = `/api/v1/debates/${ID}/`;
+                    axios
+                        .get(url)
+                        .then(function (response) {
+                            self.$data = response.data;
+                        });
+
+                    axios
+                        .get(url + 'get_candidates/')
+                        .then(function (response) {
+                            self.candidates = response.data;
+                        });
+                },
+                setWebsocketEvents: function () {
+                    let self = this;
+                    ws.onmessage = function (message) {
+                        message = JSON.parse(message.data);
+                        self.online_users_number = message.count;
+
+                    }
+                },
+
+
+                sendVote: function (candidate) {
+                    ws.send(JSON.stringify({
+                        event: EVENTS.VOTE,
+                        candidate: candidate
+                    }))
+                }
+
+            }
 
         })
     </script>

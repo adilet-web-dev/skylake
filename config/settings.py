@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'channels',
     'django_extensions',
+    'voting',
 
     'debates.apps.DebatesConfig',
     'users.apps.UsersConfig'
