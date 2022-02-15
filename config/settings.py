@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'channels',
     'django_extensions',
     'voting',
+    'crispy_forms',
 
     'debates.apps.DebatesConfig',
     'users.apps.UsersConfig'
@@ -125,6 +126,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "users.User"
+
+LOGIN_REDIRECT_URL = 'create_debate'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/

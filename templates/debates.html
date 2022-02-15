@@ -59,7 +59,8 @@ debates
         axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 
         const ID = "{{id}}";
-        const WEBSOCKET_URL = `ws://localhost:8000/ws/debates/${ID}/`;
+        const SESSION_KEY = "{{ request.session.session_key }}";
+        const WEBSOCKET_URL = `ws://localhost:8000/ws/debates/${ID}/${SESSION_KEY}/`;
 
         let ws = new WebsocketService(WEBSOCKET_URL);
 
@@ -82,7 +83,7 @@ debates
             beforeMount: function () {
                 this.getDebateAndCandidates();
                 this.setWebsocketEvents();
-
+                this.checkVotes();
             },
             methods: {
                 getDebateAndCandidates: function () {
@@ -100,6 +101,9 @@ debates
                         .then(function (response) {
                             self.candidates = response.data;
                         });
+                },
+                checkVotes: function(){
+
                 },
                 setWebsocketEvents: function () {
                     let self = this;
