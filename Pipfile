@@ -17,6 +17,7 @@ django-voting = "*"
 django-crispy-forms = "*"
 
 [dev-packages]
+jupyter = "*"
 
 [requires]
 python_version = "3.9"

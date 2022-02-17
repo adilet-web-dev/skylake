@@ -14,7 +14,7 @@ debates
                 <iframe
                         width="560"
                         height="315"
-                        src="https://www.youtube.com/embed/cZSCDMaS7Rw"
+                        src="https://www.youtube.com/embed/5qap5aO4i9A"
                         title="YouTube video player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen>
@@ -24,14 +24,23 @@ debates
         </div>
 
         <div class="row text-center">
-            <div v-for="candidate in candidates" v-bind:class="'col-' + 12 / candidates.length">
+            <div
+                    v-for="candidate in candidates"
+                    v-bind:class="'col-' + 12 / candidates.length"
+            >
                 <h1>[[ candidate.name ]]</h1>
-                <h5><i>[[ Math.round(100 / totalVotes * candidate.votes) ]]%</i></h5>
+                <h5>
+                    <i>[[ totalVotes > 0 ? Math.round(100 / totalVotes * candidate.votes) : 0 ]]%</i>
+                </h5>
+
                 [[ candidate.votes ]] votes
+
                 <br>
-                <button class="btn btn-success"
-                        v-on:click="candidate.votes++; sendVote(candidate)">
-                    vote
+                <button
+                        class="btn btn-success"
+                        v-on:click="vote(candidate)"
+                >
+                    [[ candidate.voted_by_user ? "unvote" : "vote" ]]
                 </button>
             </div>
         </div>
@@ -68,6 +77,13 @@ debates
             delimiters: ["[[", "]]"],
             el: "#app",
             data: {
+                created_at: null,
+                ended_at: null,
+                id: 28,
+                stream: "http://127.0.0.1:8000/debates/create/",
+                topic: "best season",
+                views: 0,
+
                 candidates: [],
                 online_users_number: 0,
             },
@@ -93,7 +109,11 @@ debates
                     axios
                         .get(url)
                         .then(function (response) {
-                            self.$data = response.data;
+                            self.created_at = response.data.created_at;
+                            self.ended_at = response.data.ended_at;
+                            self.id = response.data.id;
+                            self.stream = response.data.stream;
+                            self.topic = response.data.topic;
                         });
 
                     axios
@@ -109,16 +129,50 @@ debates
                     let self = this;
                     ws.onmessage = function (message) {
                         message = JSON.parse(message.data);
-                        self.online_users_number = message.count;
+                        if (message.event === EVENTS.UPDATE_ONLINE_USERS_NUMBER){
+                            self.online_users_number = message.count;
+                        }
+                        else if (message.event === EVENTS.UPDATE_VOTES) {
+                            self.candidates.forEach(function (candidate) {
+                                if (candidate.name === message.candidate){
+                                    candidate.votes = message.score;
+                                }
+                            })
+
+                        }
 
                     }
                 },
+                vote: function (candidate) {
+
+                    if (candidate.voted_by_user) {
+                        this.sendVote(candidate, 0);
+                        {#candidate.votes -= 1;#}
+                        candidate.voted_by_user = false;
+                    } else {
+                        this.sendVote(candidate, 1);
+                        {#candidate.votes += 1;#}
 
 
-                sendVote: function (candidate) {
+                        for (let i = 0; i<this.candidates.length; i++){
+                            if (this.candidates[i].voted_by_user){
+                                this.sendVote(this.candidates[i], 0);
+                                {#this.candidates[i].votes -= 1;#}
+                                this.candidates[i].voted_by_user = false;
+                            }
+                        }
+
+                        candidate.voted_by_user = true;
+
+                    }
+
+                },
+
+                sendVote: function (candidate, score) {
                     ws.send(JSON.stringify({
                         event: EVENTS.VOTE,
-                        candidate: candidate
+                        candidate: candidate,
+                        score: score
                     }))
                 }
 

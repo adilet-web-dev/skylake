@@ -1,9 +1,9 @@
-import json
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from voting.models import Vote
 
 from debates.models import Debate, Candidate
 from debates.api.serializers import DebateSerializer, CandidateSerializer
@@ -12,6 +12,8 @@ from debates.api.serializers import DebateSerializer, CandidateSerializer
 class DebateViewSet(ModelViewSet):
 	queryset = Debate.objects.all()
 	serializer_class = DebateSerializer
+
+	permission_classes = [IsAuthenticated]
 
 	@action(methods=["POST"], detail=True)
 	def add_candidates(self, request, pk):
@@ -31,5 +33,15 @@ class DebateViewSet(ModelViewSet):
 	@action(methods=["GET"], detail=True)
 	def get_candidates(self, request, pk):
 		debate = self.get_object()
-		serializer = CandidateSerializer(debate.candidates.all(), many=True)
+		candidates = []
+		for candidate in debate.candidates.all():
+			candidate.votes = Vote.objects.get_score(candidate)["score"]
+			if Vote.objects.get_for_user(candidate, self.request.user) is not None:
+				candidate.voted_by_user = True
+			else:
+				candidate.voted_by_user = False
+			candidate.save()
+			candidates.append(candidate)
+
+		serializer = CandidateSerializer(candidates, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)

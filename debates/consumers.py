@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from voting.models import Vote
 
 from debates.events import EVENTS
-from debates.models import Debate
+from debates.models import Debate, Candidate
 from debates.utils import get_user
 
 
@@ -73,8 +73,19 @@ class DebateConsumer(BaseDebateConsumer, ChannelsCounter):
 
 	async def receive_json(self, content, **kwargs):
 		if content["event"] == EVENTS["VOTE"]:
-			await self.add_vote_to_candidate(content["candidate"]["name"], self.user)
+			await self.add_vote_to_candidate(
+				candidate=content["candidate"]["name"],
+				user=self.user,
+				score=content["score"]
+			)
 
+			await self.channel_layer.group_send(
+				self.group_name, {
+					"type": "update_votes",
+					"candidate": content["candidate"]["name"],
+					"score": await self.get_total_votes(content["candidate"]["name"])
+				}
+			)
 
 	async def update_online_users_number(self, event):
 		await self.send(text_data=json.dumps({
@@ -82,13 +93,22 @@ class DebateConsumer(BaseDebateConsumer, ChannelsCounter):
 			"count": await self.get_channels_number()
 		}))
 
+	async def update_votes(self, event):
+		await self.send(text_data=json.dumps({
+			"event": EVENTS["UPDATE_VOTES"],
+			**event
+		}))
+
 	@database_sync_to_async
-	def add_vote_to_candidate(self, candidate, user):
+	def add_vote_to_candidate(self, candidate, user, score):
 		debate = Debate.objects.get(id=self.debate_id)
 		candidate = debate.candidates.get(name=candidate)
 
 		vote = Vote.objects.get_for_user(candidate, user)
-		if vote is None:
-			Vote.objects.record_vote(candidate, user, +1)
-		else:
-			Vote.objects.record_vote(candidate, user, -1)
+		Vote.objects.record_vote(candidate, user, score)
+
+	@database_sync_to_async
+	def get_total_votes(self, candidate):
+		candidate = Candidate.objects.get(name=candidate)
+		score = Vote.objects.get_score(candidate)["score"]
+		return score

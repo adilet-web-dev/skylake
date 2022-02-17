@@ -17,6 +17,7 @@ class Candidate(models.Model):
 	name = models.CharField(max_length=255)
 	votes = models.IntegerField(default=0)
 	debate = models.ForeignKey(Debate, on_delete=models.CASCADE, related_name="candidates")
+	voted_by_user = models.BooleanField(default=False)
 
 
 class Comment(models.Model):

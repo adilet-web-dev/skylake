@@ -20,5 +20,5 @@ class DebateSerializer(ModelSerializer):
 class CandidateSerializer(ModelSerializer):
 	class Meta:
 		model = Candidate
-		fields = ["name", "votes"]
+		fields = ["name", "votes", "voted_by_user"]
 
