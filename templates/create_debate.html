@@ -4,6 +4,9 @@
     <div id="app">
         <div class="box">
             <h4>Create debate</h4>
+            <div class="alert alert-danger" role="alert" v-if="isError">
+              [[ errorMessage ]]
+            </div>
             <input type="text" class="form-control" placeholder="topic" v-model:value="topic"><br>
             <input type="text" class="form-control" placeholder="add candidates" v-model:value="currentCandidate">
             <button v-on:click="candidates.push(currentCandidate); currentCandidate='';" class="btn btn-outline-dark mt-3">
@@ -45,7 +48,9 @@
                 currentCandidate: "",
                 candidates: [],
                 stream: "",
-                id: ""
+                id: "",
+                isError: false,
+                errorMessage: ""
             },
             methods: {
                 createDebate: async function() {
@@ -69,6 +74,11 @@
                     axios.post(url, {candidates: self.candidates})
                     .then(function(){
                         self.redirectToDebate(self.id);
+                    })
+                    .catch(function(error){
+                        debugger;
+                        self.isError = true;
+                        self.errorMessage = error.response.data.message;
                     });
                 },
                 redirectToDebate: function (id) {

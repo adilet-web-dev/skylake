@@ -19,6 +19,11 @@ class DebateViewSet(ModelViewSet):
 	def add_candidates(self, request, pk):
 		candidates = request.data["candidates"]
 		if len(candidates) < 2 or len(candidates) > 4:
+
+			debate = Debate.objects.last()
+			if debate.candidates.count() == 0:
+				debate.delete()
+
 			return Response(
 				data={"message": "number of candidates must be 2, 3 or 4"},
 				status=status.HTTP_400_BAD_REQUEST
