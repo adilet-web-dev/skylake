@@ -7,9 +7,9 @@
     <a class="nav-link" href="{% url 'create_debate' %}">Create</a>
   </li>
   {% if not user.is_authorized %}
-      <a href="{% url 'logout' %}" class="btn btn-warning">logout</a>
+      <a href="{% url 'logout' %}" class="btn btn-danger">logout</a>
   {% else %}
-      <a href="{% url 'login' %}" class="btn btn-success">login</a>
+      <a href="{% url 'login' %}" class="btn btn-dark">login</a>
   {% endif %}
 
 </ul>

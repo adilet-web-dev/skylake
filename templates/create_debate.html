@@ -3,17 +3,19 @@
 {% block content %}
     <div id="app">
         <div class="box">
+            <h4>Create debate</h4>
             <input type="text" class="form-control" placeholder="topic" v-model:value="topic"><br>
             <input type="text" class="form-control" placeholder="add candidates" v-model:value="currentCandidate">
-            <button v-on:click="candidates.push(currentCandidate); currentCandidate='';" class="btn btn-success mt-3">
+            <button v-on:click="candidates.push(currentCandidate); currentCandidate='';" class="btn btn-outline-dark mt-3">
                 add candidate
             </button>
             <ul>
                 <li v-for="candidate in candidates">[[ candidate ]]</li>
             </ul>
-            <input type="url" v-model:value="stream"  placeholder="url" class="form-control">
+            URL to debate YouTube stream
+            <input type="url" v-model:value="stream"  placeholder="stream link" class="form-control">
 
-            <button class="btn btn-primary" v-on:click="createDebate">
+            <button class="btn btn-dark" v-on:click="createDebate">
                 create
             </button>
         </div>
@@ -88,8 +90,8 @@
             padding: 3%;
         }
         .box {
-            padding-left: 10%;
-            padding-right: 10%;
+            padding-left: 5%;
+            padding-right: 5%;
         }
         input {
             margin-top: 15px;
