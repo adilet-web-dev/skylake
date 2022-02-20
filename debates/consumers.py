@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from voting.models import Vote
 
 from debates.events import EVENTS
-from debates.models import Debate, Candidate
+from debates.models import Debate, Candidate, Comment
 from debates.utils import get_user
 
 
@@ -87,10 +87,27 @@ class DebateConsumer(BaseDebateConsumer, ChannelsCounter):
 				}
 			)
 
+		if content["event"] == EVENTS["COMMENT"]:
+			await self.create_comment(content["comment"])
+
+			await self.channel_layer.group_send(
+				self.group_name, {
+					"type": "send_comment",
+					"comment": content["comment"],
+					"user": self.user.name
+				}
+			)
+
 	async def update_online_users_number(self, event):
 		await self.send(text_data=json.dumps({
 			"event": EVENTS["UPDATE_ONLINE_USERS_NUMBER"],
 			"count": await self.get_channels_number()
+		}))
+
+	async def send_comment(self, event):
+		await self.send(text_data=json.dumps({
+			"event": EVENTS["COMMENT"],
+			**event
 		}))
 
 	async def update_votes(self, event):
@@ -112,3 +129,11 @@ class DebateConsumer(BaseDebateConsumer, ChannelsCounter):
 		candidate = Candidate.objects.get(name=candidate)
 		score = Vote.objects.get_score(candidate)["score"]
 		return score
+
+	@database_sync_to_async
+	def create_comment(self, comment):
+		Comment.objects.create(
+			debate_id=self.debate_id,
+			comment=comment,
+			author=self.user
+		)

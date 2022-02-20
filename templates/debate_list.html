@@ -8,7 +8,7 @@ debates list
     <div style="height: 100vh">
         {% for debate in debates %}
 
-            <div style="width: 80%; margin-top: 3%; margin-left: 10%">
+            <div style="width: 80%; height: 15%; margin-top: 2%; margin-left: 10%; padding: 2%" class="shadow-lg">
                 <div class="row">
                     <div class="col-4">
                         <a href="{% url 'debate' debate.id %}">
@@ -22,7 +22,6 @@ debates list
                         {{ debate.candidates.count }} candidates
                     </div>
                 </div>
-                <hr>
             </div>
 
         {% endfor %}
