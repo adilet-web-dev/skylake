@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'voting',
     'crispy_forms',
+    'drf_yasg',
 
     'debates.apps.DebatesConfig',
     'users.apps.UsersConfig'

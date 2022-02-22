@@ -15,6 +15,7 @@ channels = "*"
 channels-redis = "*"
 django-voting = "*"
 django-crispy-forms = "*"
+drf-yasg = "*"
 
 [dev-packages]
 jupyter = "*"
