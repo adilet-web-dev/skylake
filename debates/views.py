@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, TemplateView
+from django.http import HttpResponse
 
 from debates.models import Debate
 
@@ -10,6 +11,9 @@ from debates.models import Debate
 def debate_view(request, pk):
 	return render(request, "debates.html", {"id": pk})
 
+def helloworldView(request):
+	body = "<html><body>Hello Adilet</body></html>" 
+	return HttpResponse(body)
 
 class CreateDebateTemplateView(LoginRequiredMixin, TemplateView):
 	template_name = "create_debate.html"

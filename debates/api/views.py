@@ -50,3 +50,18 @@ class DebateViewSet(ModelViewSet):
 
 		serializer = CandidateSerializer(candidates, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)
+
+	@action(methods=["delete"], detail=True)
+	def delete_debate(self,request, pk):
+		debate= self.get_object()
+		debate.delete()
+		return Response(status=status.HTTP_200_OK)
+
+	@action(methods=["PUT"], detail=True)
+	def put_debate(self,request,pk):
+		debate= self.get_object()
+		serializer= DebateSerializer(debate,data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(data=serializer.data, status= status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

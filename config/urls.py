@@ -43,5 +43,5 @@ urlpatterns += [
     path('users/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('debates/', include('debates.urls')),
-    path('api/v1/', include('config.api_routers'))
+    path('api/v1/', include('config.api_routers')),
 ]
