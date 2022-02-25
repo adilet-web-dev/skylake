@@ -49,3 +49,20 @@ class CreateDebateAPITest(TestCase):
 		})
 
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class CreateSearchAPITest(TestCase):
+	def setUp(self) ->None:
+		self.client= APIClient()
+		self.user= UserFactory()
+		self.client.force_login(self.user)
+		self.search_url ="/api/v1/search/{}"
+		self.canditate_search_url="/api/v1/search_c/{}"
+
+	def test_search(self):
+		debate= DebateFactory()
+		response= self.client.get(search_url.format(debate.topic))
+		self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+	# def test_candidate_search(self):
+	# 	pass
