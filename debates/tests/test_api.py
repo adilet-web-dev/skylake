@@ -53,21 +53,3 @@ class CreateDebateAPITest(TestCase):
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class GetPrivateUserIdAPITest(TestCase):
-	def setUp(self) -> None:
-		self.client = APIClient()
-
-	def test_it_gets_private_id(self):
-		user = UserFactory()
-		response = self.client.post('/api/v1/users/get-unique-id/', {
-			"username": user.name,
-			"password": user.password
-		})
-
-		self.assertEqual(response.data, user.private_id)
-
-
-class UserDebatesAPITest(TestCase):
-	def setUp(self) -> None:
-		self.user = UserFactory()
-		self.client = APIClient()

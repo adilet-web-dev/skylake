@@ -21,7 +21,6 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from users.api import views
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -33,7 +32,7 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
    public=True,
-   permission_classes=[permissions.AllowAny],
+   permission_classes=(permissions.AllowAny,)
 )
 
 urlpatterns = [
@@ -48,5 +47,5 @@ urlpatterns += [
     path('', RedirectView.as_view(url=reverse_lazy("debate_list"))),
     path('debates/', include('debates.urls')),
     path('api/v1/', include('config.api_routers')),
-    path('api/v1/users/get-unique-id/', views.GetPrivateUserIdAPI.as_view())
+    path('api/v1/users/', include('users.urls'))
 ]
