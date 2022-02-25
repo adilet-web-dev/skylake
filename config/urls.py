@@ -14,11 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include, re_path, reverse_lazy
+from django.views.generic import RedirectView
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+
+from users.api import views
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -42,6 +45,8 @@ urlpatterns = [
 urlpatterns += [
     path('users/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
+    path('', RedirectView.as_view(url=reverse_lazy("debate_list"))),
     path('debates/', include('debates.urls')),
-    path('api/v1/', include('config.api_routers'))
+    path('api/v1/', include('config.api_routers')),
+    path('api/v1/users/get-unique-id/', views.GetPrivateUserIdAPI.as_view())
 ]

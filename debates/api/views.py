@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -18,11 +20,13 @@ class DebateViewSet(ModelViewSet):
 	@action(methods=["POST"], detail=True)
 	def add_candidates(self, request, pk):
 		candidates = request.data["candidates"]
+		candidates = json.loads(candidates) if type(candidates) == str else candidates
 		if len(candidates) < 2 or len(candidates) > 4:
 
 			debate = Debate.objects.last()
-			if debate.candidates.count() == 0:
-				debate.delete()
+			if debate is not None:
+				if debate.candidates.count() == 0:
+					debate.delete()
 
 			return Response(
 				data={"message": "number of candidates must be 2, 3 or 4"},

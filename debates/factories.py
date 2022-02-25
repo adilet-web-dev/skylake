@@ -3,7 +3,7 @@ from random import randint
 
 from django.utils import timezone
 
-from debates.models import Debate
+from debates.models import Debate, Candidate
 from users.factories import UserFactory
 
 
@@ -17,3 +17,11 @@ class DebateFactory(factory.django.DjangoModelFactory):
 
 	class Meta:
 		model = Debate
+
+
+class CandidateFactory(factory.django.DjangoModelFactory):
+	name = factory.Faker("name")
+	debate = factory.SubFactory(DebateFactory)
+
+	class Meta:
+		model = Candidate

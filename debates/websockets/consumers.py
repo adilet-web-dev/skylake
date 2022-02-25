@@ -3,7 +3,6 @@ import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from debates.events import EVENTS
-from debates.utils import get_user
 from debates.websockets.db import AsyncDatabase
 
 
@@ -41,10 +40,12 @@ class BaseDebateConsumer(AsyncJsonWebsocketConsumer, AsyncDatabase):
 		await self.accept()
 
 	async def authenticate(self):
-		session_key = self.scope["url_route"]["kwargs"]["session_key"]
-		self.user = await get_user(session_key)
-		if not await self.is_authenticated(self.user):
-			await self.disconnect(code=403)
+		private_id = self.scope["url_route"]["kwargs"]["private_id"]
+		user = await self.get_user_or_none(private_id)
+		if not user:
+			await self.disconnect(403)
+		else:
+			self.user = user
 
 	async def validate_debate(self):
 		self.debate_id = self.scope["url_route"]["kwargs"]["id"]
