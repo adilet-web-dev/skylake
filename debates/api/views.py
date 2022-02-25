@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from voting.models import Vote
 
 from debates.models import Debate, Candidate
-from debates.api.serializers import DebateSerializer, CandidateSerializer
+from debates.api.serializers import DebateSerializer, CandidateSerializer, CandidateDebateSerilizer
 
 
 class DebateViewSet(ModelViewSet):
@@ -65,3 +66,22 @@ class DebateViewSet(ModelViewSet):
 			serializer.save()
 			return Response(data=serializer.data, status= status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class search_debate_view(APIView):
+	permission_classes=[IsAuthenticated]
+	def get(self,request, topic):
+		debates= Debate.objects.filter(topic__icontains=topic)
+		if debates.exists():
+			serializer=DebateSerializer(debates, many=True)
+			return Response(data=serializer.data, status=status.HTTP_200_OK)
+		return Response(status=status.HTTP_204_NO_CONTENT)
+
+class search_with_candidate_view(APIView):
+	permission_classes=[IsAuthenticated]
+	def get(self,request, candidate):
+		candidates= Candidate.objects.filter(name__icontains=candidate)
+		if candidates.exists():
+			serializer= CandidateDebateSerilizer(candidates,many=True)
+			data = [d["debate"] for d in serializer.data]
+			return Response(data=data,status= status.HTTP_200_OK)
+		return Response(status=status.HTTP_204_NO_CONTENT)
