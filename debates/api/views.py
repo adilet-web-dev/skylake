@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from voting.models import Vote
+from django.db.models import Q
 
 from debates.models import Debate, Candidate
 from debates.api.serializers import DebateSerializer, CandidateSerializer, CandidateDebateSerilizer
@@ -52,22 +53,16 @@ class DebateViewSet(ModelViewSet):
 		serializer = CandidateSerializer(candidates, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)
 
+#This method delete the candidate that have reliation for the deleted debate
+
 	@action(methods=["delete"], detail=True)
 	def delete_debate(self,request, pk):
 		debate= self.get_object()
 		debate.delete()
 		return Response(status=status.HTTP_200_OK)
 
-	@action(methods=["PUT"], detail=True)
-	def put_debate(self,request,pk):
-		debate= self.get_object()
-		serializer= DebateSerializer(debate,data=request.data)
-		if serializer.is_valid():
-			serializer.save()
-			return Response(data=serializer.data, status= status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class search_debate_view(APIView):
+class SearchDebateView(APIView):
 	permission_classes=[IsAuthenticated]
 	def get(self,request, topic):
 		debates= Debate.objects.filter(topic__icontains=topic)
@@ -76,12 +71,21 @@ class search_debate_view(APIView):
 			return Response(data=serializer.data, status=status.HTTP_200_OK)
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
-class search_with_candidate_view(APIView):
+class SearchWithCandidateView(APIView):
 	permission_classes=[IsAuthenticated]
 	def get(self,request, candidate):
 		candidates= Candidate.objects.filter(name__icontains=candidate)
 		if candidates.exists():
 			serializer= CandidateDebateSerilizer(candidates,many=True)
-			data = [d["debate"] for d in serializer.data]
-			return Response(data=data,status= status.HTTP_200_OK)
+			return Response(data=serializer.data,status= status.HTTP_200_OK)
 		return Response(status=status.HTTP_204_NO_CONTENT)
+
+class SearchDebateFullView(APIView):
+	permission_classes=[IsAuthenticated]
+	def get(self, request, topic, candidate):
+		candidates= Candidate.objects.filter(Q(name__icontains=candidate), Q(debate__topic__icontains=topic))
+		if candidates.exists():
+			serializer= CandidateDebateSerilizer(candidates,many=True)
+			return Response(data=serializer.data, status=status.HTTP_200_OK)
+		return Response(status=status.HTTP_204_NO_CONTENT)
+
