@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from django.urls import path
-from debates.api.views import DebateViewSet , search_with_candidate_view,search_debate_view
+from debates.api.views import DebateViewSet , SearchWithCandidateView,SearchDebateView, SearchDebateFullView
 
 
 
@@ -15,8 +15,9 @@ router.register("debates", DebateViewSet)
 app_name = "api"
 
 urlpatterns=[
-    path("search/<str:topic>", search_debate_view.as_view()),
-    path("search_c/<str:candidate>", search_with_candidate_view.as_view()),
+    path("debates/search/<str:topic>", SearchDebateView.as_view()),
+    path("debates/search_c/<str:candidate>", SearchWithCandidateView.as_view()),
+    path("debates/search/<str:candidate>/<str:topic>",SearchDebateFullView.as_view()),
 ]
 urlpatterns+=router.urls
 
