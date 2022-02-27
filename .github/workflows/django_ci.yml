@@ -28,6 +28,7 @@ jobs:
       # postgres://user:password@host:port/database
       DEBUD_MODE: "True"
       DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgres"
+      SECRET_KEY: "secret"
 
     steps:
       - name: Checkout Code Repository
