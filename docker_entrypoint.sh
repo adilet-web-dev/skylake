@@ -13,4 +13,4 @@ python manage.py migrate
 
 echo -e "Starting server\n"
 
-daphne -p 8000 -b 0.0.0.0 config.asgi:application
+gunicorn config.wsgi
