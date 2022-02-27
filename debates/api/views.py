@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from voting.models import Vote
 from django.db.models import Q
-
+import json
 from debates.models import Debate, Candidate
 from debates.api.serializers import DebateSerializer, CandidateSerializer, CandidateDebateSerilizer
 
@@ -20,11 +20,14 @@ class DebateViewSet(ModelViewSet):
 	@action(methods=["POST"], detail=True)
 	def add_candidates(self, request, pk):
 		candidates = request.data["candidates"]
+		candidates = json.loads(candidates) if type(candidates) == str else candidates
+
 		if len(candidates) < 2 or len(candidates) > 4:
 
 			debate = Debate.objects.last()
-			if debate.candidates.count() == 0:
-				debate.delete()
+			if debate is not None:
+				if debate.candidates.count() == 0:
+					debate.delete()
 
 			return Response(
 				data={"message": "number of candidates must be 2, 3 or 4"},

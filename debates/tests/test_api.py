@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from users.factories import UserFactory
-from debates.factories import DebateFactory, CandidateFactory
+from debates.factories import DebateFactory , CandidateFactory
 from debates.models import Debate
 
 
@@ -50,23 +50,23 @@ class CreateDebateAPITest(TestCase):
 
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-# class SearchDebateAPITest(TestCase):
-# 	def setUp(self) ->None:
-# 		self.client= APIClient()
-# 		self.user= UserFactory()
-# 		self.client.force_login(self.user)
-# 		self.search_url ="/api/v1/search/{}"
-# 		self.candidate_search_url="/api/v1/search_c/{}"
+class SearchDebateAPITest(TestCase):
+	def setUp(self) ->None:
+		self.client= APIClient()
+		self.user= UserFactory()
+		self.client.force_login(self.user)
+		self.search_url ="/api/v1/debates/search/{}"
+		self.candidate_search_url="/api/v1/debates/search_c/{}"
 
-# 	def test_search(self):
-# 		debate= DebateFactory()
-# 		for random_int in range(randint(len(debate.topic)-1)):
-# 			response= self.client.get(search_url.format(debate.topic[:-randint(1,len(debate.topic)-1)]))
-# 			self.assertEqual(response.status_code, status.HTTP_200_OK)
+	def test_search(self):
+		debate= DebateFactory()
+		for random_int in range(randint(1,len(debate.topic)-1)):
+			response= self.client.get(self.search_url.format(debate.topic[:-randint(1,len(debate.topic)-1)]))
+			self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-# 	def test_candidate_search(self):
-# 		candidate= CandidateFactory()
-# 		for random_int in range(randint(len(candidate.name)-1)):
-# 			response= self.client.get(candidate_search_url.format(candidate.name[:-randint(1,len(candidate.name)-1)]))
-# 			self.assertEqual(response.status_code, status.HTTP_200_OK)
+	def test_candidate_search(self):
+		candidate= CandidateFactory()
+		for random_int in range(randint(1,len(candidate.name)-1)):
+			response= self.client.get(self.candidate_search_url.format(candidate.name[:-randint(1,len(candidate.name)-1)]))
+			self.assertEqual(response.status_code, status.HTTP_200_OK)
