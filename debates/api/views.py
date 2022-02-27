@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
 from voting.models import Vote
 
 from debates.models import Debate, Candidate
@@ -16,6 +17,26 @@ class DebateViewSet(ModelViewSet):
 	serializer_class = DebateSerializer
 
 	permission_classes = [IsAuthenticated]
+
+	def perform_create(self, serializer):
+
+		data = self.request.data
+		tags = data.get("tags")
+
+		debate = serializer.save(
+			topic=data.get("topic"),
+			stream=data.get("stream"),
+			owner=self.request.user,
+			created_at=timezone.now()
+		)
+
+		if tags is not None:
+			tags = json.loads(tags) if type(tags) == str else tags
+
+			for tag in tags:
+				debate.tags.create(tag=tag)
+
+		debate.save()
 
 	@action(methods=["POST"], detail=True)
 	def add_candidates(self, request, pk):
