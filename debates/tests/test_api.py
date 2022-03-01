@@ -22,7 +22,6 @@ class CreateDebateAPITest(TestCase):
 
 		payload = {
 			"topic": "president",
-			"description": "big debate for presidency",
 			"stream": "https://www.youtube.com/watch?v=o0EgZ1SHtdg",
 		}
 
@@ -52,4 +51,28 @@ class CreateDebateAPITest(TestCase):
 
 		self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+
+	def test_it_creates_debate_with_tags(self):
+		payload = {
+			"topic": "president",
+			"stream": "https://www.youtube.com/watch?v=o0EgZ1SHtdg",
+			"tags": json.dumps(["politics", "uefi"])
+		}
+
+		self.client.post("/api/v1/debates/", payload)
+		debate = Debate.objects.get(topic=payload["topic"])
+		self.assertEqual(debate.tags.count(), 2)
+
+	def test_debate_creation_with_no_tags(self):
+		payload = {
+			"topic": "president",
+			"stream": "https://www.youtube.com/watch?v=o0EgZ1SHtdg",
+			"tags": "[]"
+		}
+
+		response = self.client.post("/api/v1/debates/", payload)
+		self.assertEqual(response.status_code, 201)
+
+		debate = Debate.objects.get(topic=payload["topic"])
+		self.assertEqual(debate.tags.count(), 0)
 

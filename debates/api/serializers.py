@@ -17,13 +17,6 @@ class DebateSerializer(ModelSerializer):
 			"id"
 		]
 
-	def create(self, validated_data):
-		return Debate.objects.create(
-			**validated_data,
-			owner=self.context["request"].user,
-			created_at=timezone.now()
-		)
-
 
 class CandidateSerializer(ModelSerializer):
 	class Meta:
