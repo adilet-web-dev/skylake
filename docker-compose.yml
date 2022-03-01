@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  backend:
+    build: ./
+    ports:
+      - "8888:8000"
+
+    depends_on:
+      - db
+      - redis
+
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=jgidfsgsodfhfskdfjhsdd
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+
+  db:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - "/home/postgres-volumes:/var/lib/postgresql/data"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
