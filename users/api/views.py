@@ -10,7 +10,7 @@ class GetPrivateUserIdAPI(APIView):
 	def post(self, request):
 		data = request.data
 		try:
-			user = User.objects.get(name=data["username"])
+			user = User.objects.get(username=data["username"])
 
 			if user.password == data["password"]:
 				return Response(data=user.private_id, status=status.HTTP_200_OK)
