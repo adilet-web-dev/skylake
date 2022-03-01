@@ -102,7 +102,7 @@ class DebateConsumer(BaseDebateConsumer, ChannelsCounter):
 				self.group_name, {
 					"type": "send_comment",
 					"comment": content["comment"],
-					"user": self.user.name
+					"user": self.user.username
 				}
 			)
 

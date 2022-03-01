@@ -10,7 +10,7 @@ class GetPrivateUserIdAPITest(TestCase):
 	def test_it_gets_private_id(self):
 		user = UserFactory()
 		response = self.client.post('/api/v1/users/get-private-id/', {
-			"username": user.name,
+			"username": user.username,
 			"password": user.password
 		})
 

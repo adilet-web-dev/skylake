@@ -18,6 +18,8 @@ django-crispy-forms = "*"
 drf-yasg = "*"
 gunicorn = "*"
 whitenoise = "*"
+dj-rest-auth = {extras = ["with_social"], version = "*"}
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 jupyter = "*"

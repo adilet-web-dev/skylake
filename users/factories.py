@@ -3,7 +3,7 @@ from users.models import User
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    name = factory.Faker("name")
+    username = factory.Faker("name")
     email = factory.Faker("email")
     password = factory.Faker("password")
 

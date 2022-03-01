@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG_MODE") == "True"
+DEBUG = True
 
-ALLOWED_HOSTS = ['skylake-debates.herokuapp.com']
+ALLOWED_HOSTS = ['skylake-debates.herokuapp.com', 'localhost']
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
@@ -45,18 +45,28 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
     'rest_framework',
     'channels',
     'django_extensions',
     'voting',
     'crispy_forms',
     'drf_yasg',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'rest_framework_simplejwt',
 
     'debates.apps.DebatesConfig',
     'users.apps.UsersConfig'
 
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -126,6 +136,18 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    )
+}
+
+REST_USE_JWT = True
+
+JWT_AUTH_COOKIE = 'skylake-auth'
+JWT_AUTH_REFRESH_COOKIE = 'skylake-auth-refresh'
 
 AUTH_USER_MODEL = "users.User"
 
