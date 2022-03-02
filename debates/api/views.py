@@ -5,6 +5,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
@@ -15,6 +16,7 @@ from django.db.models import Q
 from voting.models import Vote
 
 from debates.models import Debate, Candidate, TaggedItem
+from users.models import User
 from debates.api.serializers import DebateSerializer, CandidateSerializer
 
 
@@ -44,9 +46,18 @@ class DebateViewSet(ModelViewSet):
 
 		debate.save()
 
-	@swagger_auto_schema(method="POST", request_body=CandidateSerializer())
-	@action(methods=["POST"], detail=True)
-	def add_candidates(self, request, pk):
+	@action(methods=["GET"], detail=False)
+	def recent(self, request):
+		debates = Debate.objects.order_by("-created_at")
+		return Response(
+			data=self.serializer_class(debates, many=True).data,
+			status=200
+		)
+
+
+class AddCandidatesAPI(APIView):
+	@swagger_auto_schema(request_body=CandidateSerializer())
+	def post(self, request, pk):
 		candidates = request.data["candidates"]
 		candidates = json.loads(candidates) if type(candidates) == str else candidates
 		if len(candidates) < 2 or len(candidates) > 4:
@@ -61,16 +72,17 @@ class DebateViewSet(ModelViewSet):
 				status=status.HTTP_400_BAD_REQUEST
 			)
 
-		debate = self.get_object()
+		debate = get_object_or_404(Debate, pk=pk)
 
 		for candidate in candidates:
 			Candidate.objects.create(debate=debate, name=candidate)
 		return Response(status=status.HTTP_201_CREATED)
 
-	@swagger_auto_schema(method="GET", responses={200: CandidateSerializer()})
-	@action(methods=["GET"], detail=True)
-	def get_candidates(self, request, pk):
-		debate = self.get_object()
+
+class GetDebateCandidatesAPI(APIView):
+	@swagger_auto_schema(responses={200: CandidateSerializer()})
+	def get(self, request, pk):
+		debate = get_object_or_404(Debate, pk=pk)
 		candidates = []
 		for candidate in debate.candidates.all():
 			candidate.votes = Vote.objects.get_score(candidate)["score"]
@@ -107,3 +119,13 @@ class SearchDebateListAPI(ListAPIView):
 		)
 
 		return debates
+
+
+class UserDebateListAPI(ListAPIView):
+	serializer_class = DebateSerializer
+	permission_classes = [IsAuthenticated]
+
+	def get_queryset(self):
+		username = self.kwargs.get("username")
+		user = get_object_or_404(User, username=username)
+		return user.debates.all()

@@ -1,7 +1,8 @@
 import json
-import uuid
 
 from django.test import TestCase
+from django.utils import timezone
+
 from rest_framework.test import APIClient
 from rest_framework import status
 
@@ -16,7 +17,7 @@ class CreateDebateAPITest(TestCase):
 		self.user = UserFactory()
 		self.client.force_login(self.user)
 
-		self.candidate_url = "/api/v1/debates/{}/add_candidates/"
+		self.candidate_url = "/api/v1/debates/{}/add-candidates/"
 
 	def test_it_creates_debate(self):
 
@@ -116,3 +117,43 @@ class SearchDebateListAPITest(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertContains(response, debate.topic)
+
+
+class RecentDebatesListAPITest(TestCase):
+	def setUp(self) -> None:
+		self.client = APIClient()
+		self.user = UserFactory()
+		self.client.force_login(self.user)
+
+	def test_it_returns_recent_debates(self):
+		time1 = timezone.now() - timezone.timedelta(hours=1)
+		time2 = timezone.now() - timezone.timedelta(hours=2)
+		time3 = timezone.now() - timezone.timedelta(hours=3)
+
+		debate1 = DebateFactory(created_at=time1)
+		debate2 = DebateFactory(created_at=time2)
+		debate3 = DebateFactory(created_at=time3)
+
+		response = self.client.get("/api/v1/debates/recent/")
+
+		self.assertEqual(response.status_code, 200)
+
+		self.assertEqual(response.data[0]["topic"], debate1.topic)
+		self.assertEqual(response.data[1]["topic"], debate2.topic)
+		self.assertEqual(response.data[2]["topic"], debate3.topic)
+
+
+class UserDebatesListAPITest(TestCase):
+	def setUp(self) -> None:
+		self.client = APIClient()
+		self.user = UserFactory()
+		self.client.force_login(self.user)
+
+	def test_it_returns_users_debates(self):
+		user = UserFactory()
+		debates = DebateFactory.create_batch(3, owner=user)
+
+		response = self.client.get(f"/api/v1/debates/user/{user.username}/")
+
+		self.assertContains(response, debates[0].topic)
+		self.assertContains(response, debates[1].topic)
