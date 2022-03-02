@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from users.factories import UserFactory
-from debates.factories import DebateFactory
+from debates.factories import DebateFactory, CandidateFactory
 from debates.models import Debate
 
 
@@ -76,3 +76,43 @@ class CreateDebateAPITest(TestCase):
 		debate = Debate.objects.get(topic=payload["topic"])
 		self.assertEqual(debate.tags.count(), 0)
 
+
+class FilterDebateByTagListAPITest(TestCase):
+	def setUp(self) -> None:
+		self.client = APIClient()
+		self.user = UserFactory()
+		self.client.force_login(self.user)
+
+	def test_it_gets_debate_by_tag(self):
+		debate = DebateFactory()
+		debate.tags.create(tag="test_tag")
+
+		response = self.client.get("/api/v1/debates/filter&tag=test_tag")
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, debate.topic)
+
+
+class SearchDebateListAPITest(TestCase):
+	def setUp(self) -> None:
+		self.client = APIClient()
+		self.user = UserFactory()
+		self.client.force_login(self.user)
+
+	def test_it_finds_debate(self):
+		debate = DebateFactory()
+
+		response = self.client.get(f"/api/v1/debates/find={debate.topic[:3]}")
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, debate.topic)
+
+	def test_finds_debate_by_candidate_name(self):
+		debate = DebateFactory()
+		candidate1 = CandidateFactory(debate=debate)
+		candidate2 = CandidateFactory(debate=debate)
+
+		response = self.client.get(f"/api/v1/debates/find={candidate1.name}")
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, debate.topic)

@@ -1,14 +1,20 @@
 import json
 
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+
+from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+
 from voting.models import Vote
 
-from debates.models import Debate, Candidate
+from debates.models import Debate, Candidate, TaggedItem
 from debates.api.serializers import DebateSerializer, CandidateSerializer
 
 
@@ -38,6 +44,7 @@ class DebateViewSet(ModelViewSet):
 
 		debate.save()
 
+	@swagger_auto_schema(method="POST", request_body=CandidateSerializer())
 	@action(methods=["POST"], detail=True)
 	def add_candidates(self, request, pk):
 		candidates = request.data["candidates"]
@@ -60,6 +67,7 @@ class DebateViewSet(ModelViewSet):
 			Candidate.objects.create(debate=debate, name=candidate)
 		return Response(status=status.HTTP_201_CREATED)
 
+	@swagger_auto_schema(method="GET", responses={200: CandidateSerializer()})
 	@action(methods=["GET"], detail=True)
 	def get_candidates(self, request, pk):
 		debate = self.get_object()
@@ -75,3 +83,27 @@ class DebateViewSet(ModelViewSet):
 
 		serializer = CandidateSerializer(candidates, many=True)
 		return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class FilterDebateByTagListAPI(ListAPIView):
+	serializer_class = DebateSerializer
+	permission_classes = [IsAuthenticated]
+	lookup_url_kwarg = "query"
+
+	def get_queryset(self):
+		query = self.kwargs.get(self.lookup_url_kwarg)
+		tag = get_object_or_404(TaggedItem, tag=query)
+		return tag.debates.all()
+
+
+class SearchDebateListAPI(ListAPIView):
+	serializer_class = DebateSerializer
+	permission_classes = [IsAuthenticated]
+
+	def get_queryset(self):
+		query = self.kwargs.get("query")
+		debates = Debate.objects.filter(
+			Q(topic__icontains=query) | Q(candidates__name__icontains=query)
+		)
+
+		return debates

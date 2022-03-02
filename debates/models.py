@@ -24,7 +24,7 @@ class Debate(models.Model):
     stream = models.URLField(help_text="youtube live stream link")
     views = models.PositiveIntegerField(default=0)
     owner = models.ForeignKey(User, related_name="debates", on_delete=models.PROTECT)
-    tags = GenericRelation(TaggedItem, related_query_name="debate")
+    tags = GenericRelation(TaggedItem, related_query_name="debates")
 
     def __str__(self):
         return f"{self.topic} - {self.owner}. {self.created_at}"
